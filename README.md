@@ -1,36 +1,31 @@
-# MeetMind AI — Backend
+# MeetMind AI
 
-A complete Flask backend for MeetMind AI: Google Sign-In, Google Calendar integration with
-real Google Meet link generation, an AI scheduling assistant (Groq / Ollama / OpenRouter),
-and Supabase persistence. JWT-protected throughout.
+A complete application with a Flask backend and HTML/JS frontend for MeetMind AI: Google Sign-In, Google Calendar integration with real Google Meet link generation, an AI scheduling assistant (Groq / Ollama / OpenRouter), and Supabase persistence. JWT-protected throughout.
 
 ```
-backend/
-├── app.py                       # Flask app factory + entrypoint
-├── requirements.txt
-├── .env.example
-├── config/
-│   ├── settings.py              # env-based configuration
-│   ├── supabase_client.py       # Supabase client singleton
-│   └── google_config.py         # Google OAuth scopes/endpoints
-├── routes/
-│   ├── auth_routes.py           # /api/auth/*
-│   ├── calendar_routes.py       # /api/calendar/*
-│   ├── ai_routes.py             # /api/ai/*
-│   └── meeting_routes.py        # /api/meetings*
-├── services/
-│   ├── google_auth_service.py   # OAuth code exchange, refresh, user upsert
-│   ├── google_calendar_service.py # events / freebusy / Meet link creation
-│   ├── ai_service.py            # Groq / Ollama / OpenRouter dispatch
-│   ├── scheduler_service.py     # conflict detection + alternative slots
-│   └── meeting_service.py       # meeting CRUD orchestration
-├── middleware/
-│   └── auth_middleware.py       # @token_required JWT guard
-├── utils/
-│   ├── jwt_handler.py
-│   └── time_utils.py            # RFC3339 + free-slot math
-└── database/
-    └── supabase_schema.sql
+meetmind-supabase-auth/
+│
+├── backend/
+│   ├── app.py                       # Flask app factory + entrypoint
+│   ├── requirements.txt
+│   ├── .env.example
+│   ├── config/                      # Settings & Supabase/Google configs
+│   ├── routes/                      # API routes (auth, calendar, ai, meetings)
+│   ├── services/                    # Business logic & integrations
+│   ├── middleware/                  # JWT auth middleware
+│   ├── utils/                       # Helper functions & JWT handlers
+│   └── database/                    # SQL schema definitions
+│
+├── frontend/
+│   ├── index.html                   # Main application UI
+│   ├── style.css                    # Styling
+│   ├── script.js                     # Main frontend application logic
+│   ├── config.js                    # Client-side configuration
+│   ├── config.example.js
+│   └── assets/                      # Static assets
+│
+├── README.md
+└── .gitignore
 ```
 
 ---
