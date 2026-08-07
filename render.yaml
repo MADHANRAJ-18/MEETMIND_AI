@@ -25,7 +25,9 @@ services:
         sync: false
 
   # --- Frontend Static Site ---
-  - type: static
+  - type: web
     name: meetmind-frontend
+    env: static
     rootDir: frontend
-    publishDir: .
+    buildCommand: ""
+    staticPublishPath: .
