@@ -1,0 +1,1130 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Meeting Scheduler Agent</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="loader">
+    <div class="spinner-grow text-primary">
+    </div>
+    <span>Preparing your workspace...</span>
+  </div>
+  <section id="loginPage" class="login-page d-none">
+    <div class="container">
+      <div class="row min-vh-100 align-items-center justify-content-center py-5">
+        <div class="col-xl-10">
+          <div class="login-shell row g-0">
+            <div class="col-lg-6 login-art d-none d-lg-flex">
+              <div>
+                <a class="brand text-white mb-5" href="#">
+                  <b><i class="bi bi-stars"></i></b>
+                  MeetMind</a>
+                <span class="glass-tag">
+                  <i class="bi bi-magic"></i>
+                  AI-powered scheduling</span>
+                <h1>Turn busy calendars into easy conversations.</h1>
+                <p>Find the best time, resolve conflicts, and keep every participant in sync — automatically.</p>
+                <div class="proof">
+                  <div>
+                    <strong>4.9/5</strong>
+                    <small>Team satisfaction</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6 login-form">
+              <div>
+                <a class="brand d-lg-none mb-5" href="#"><b><i class="bi bi-stars"></i></b> MeetMind</a>
+
+                <!-- Auth tabs -->
+                <div class="auth-tabs mb-4">
+                  <button id="tabSignIn" class="auth-tab active" type="button">Sign In</button>
+                  <button id="tabSignUp" class="auth-tab" type="button">Create Account</button>
+                </div>
+
+                <!-- ── SIGN IN PANEL ── -->
+                <div id="panelSignIn">
+                  <span class="kicker">WELCOME BACK</span>
+                  <h2>Sign in to your workspace</h2>
+
+                  <form id="emailSignInForm" novalidate class="mt-3">
+                    <div class="mb-3">
+                      <label class="form-label" for="siEmail">Email</label>
+                      <input id="siEmail" type="email" class="form-control" placeholder="you@example.com"
+                        autocomplete="email" required>
+                    </div>
+                    <div class="mb-2">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label mb-0" for="siPassword">Password</label>
+                        <a href="#" id="forgot" tabindex="-1">Forgot password?</a>
+                      </div>
+                      <div class="input-group mt-1">
+                        <input id="siPassword" type="password" class="form-control" placeholder="••••••••"
+                          autocomplete="current-password" required>
+                        <button class="btn btn-eye btn-eye-toggle" type="button" data-target="siPassword" tabindex="-1"
+                          aria-label="Toggle password visibility"><i class="bi bi-eye"></i></button>
+                      </div>
+                    </div>
+                    <button id="emailSignInBtn" class="btn btn-primary w-100 mt-3" type="submit">
+                      <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                    </button>
+                  </form>
+
+                  <div class="auth-divider my-3"><span>or</span></div>
+
+                  <button id="googleSignIn" class="btn google-signin w-100" type="button">
+                    <i class="bi bi-google"></i>
+                    <span>Continue with Google</span>
+                  </button>
+                </div>
+
+                <!-- ── CREATE ACCOUNT PANEL ── -->
+                <div id="panelSignUp" class="d-none">
+                  <span class="kicker">GET STARTED</span>
+                  <h2>Create your account</h2>
+
+                  <form id="emailSignUpForm" novalidate class="mt-3">
+                    <div class="mb-3">
+                      <label class="form-label" for="suName">Full Name</label>
+                      <input id="suName" type="text" class="form-control" placeholder="Jane Smith" autocomplete="name"
+                        required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label" for="suEmail">Email</label>
+                      <input id="suEmail" type="email" class="form-control" placeholder="you@example.com"
+                        autocomplete="email" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label" for="suPassword">Password</label>
+                      <div class="input-group">
+                        <input id="suPassword" type="password" class="form-control" placeholder="Min. 8 characters"
+                          autocomplete="new-password" required minlength="8">
+                        <button class="btn btn-eye btn-eye-toggle" type="button" data-target="suPassword" tabindex="-1"
+                          aria-label="Toggle password visibility"><i class="bi bi-eye"></i></button>
+                      </div>
+                    </div>
+                    <button id="emailSignUpBtn" class="btn btn-primary w-100" type="submit">
+                      <i class="bi bi-person-plus me-1"></i> Create Account
+                    </button>
+                  </form>
+
+                  <div class="auth-divider my-3"><span>or</span></div>
+
+                  <button id="googleSignUp" class="btn google-signin w-100" type="button">
+                    <i class="bi bi-google"></i>
+                    <span>Sign up with Google</span>
+                  </button>
+                </div>
+
+                <div id="authError" class="auth-error d-none mt-3"></div>
+                <div id="authSuccess" class="auth-success d-none mt-3"></div>
+
+                <p class="login-foot mt-4">
+                  <i class="bi bi-shield-check"></i>
+                  Your data is protected with Supabase enterprise-grade security
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div id="app" class="d-none">
+    <aside id="sidebar">
+      <div class="side-head">
+        <a class="brand" href="#" data-page="dashboard">
+          <b>
+            <i class="bi bi-stars">
+            </i>
+          </b>
+          <span>MeetMind</span>
+        </a>
+        <button id="collapse" class="icon-btn d-none d-lg-grid">
+          <i class="bi bi-chevron-left">
+          </i>
+        </button>
+      </div>
+      <div class="workspace">
+        <b>A</b>
+        <span>
+          <strong>MR TECH</strong>
+          <small>Business workspace</small>
+        </span>
+      </div>
+      <nav>
+        <small>WORKSPACE</small>
+        <a class="active" href="#" data-page="dashboard">
+          <i class="bi bi-grid-1x2">
+          </i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" data-page="schedule">
+          <i class="bi bi-calendar-plus">
+          </i>
+          <span>Schedule meeting</span>
+        </a>
+        <a href="#" data-page="smart">
+          <i class="bi bi-magic">
+          </i>
+          <span>Smart scheduler</span>
+          <em>AI</em>
+        </a>
+        <a href="#" data-page="calendar">
+          <i class="bi bi-calendar3">
+          </i>
+          <span>Calendar</span>
+        </a>
+        <a href="#" data-page="participants">
+          <i class="bi bi-people">
+          </i>
+          <span>Participants</span>
+        </a>
+        <small>INSIGHTS</small>
+        <a href="#" data-page="notifications">
+          <i class="bi bi-bell">
+          </i>
+          <span>Notifications</span>
+          <em id="navCount">0</em>
+        </a>
+        <a href="#" data-page="analytics">
+          <i class="bi bi-bar-chart">
+          </i>
+          <span>Analytics</span>
+        </a>
+        <a href="#" data-page="timetable">
+          <i class="bi bi-table">
+          </i>
+          <span>Timetable</span>
+        </a>
+      </nav>
+      <div class="ai-box">
+        <i class="bi bi-stars">
+        </i>
+        <strong>Scheduling assistant</strong>
+        <p>Ready to find your next perfect time.</p>
+        <button class="btn btn-light btn-sm w-100" data-page="smart">Ask AI</button>
+      </div>
+      <div class="side-user">
+        <span class="avatar avatar-purple" id="sideUserAvatar">MR</span>
+        <span>
+          <strong id="sideUserName">MADHANRAJ</strong>
+          <small id="sideUserEmail">Workspace admin</small>
+        </span>
+        <button id="logout" class="icon-btn" type="button" title="Sign out" aria-label="Sign out">
+          <i class="bi bi-box-arrow-right">
+          </i>
+        </button>
+      </div>
+    </aside>
+    <div id="backdrop">
+    </div>
+    <main>
+      <header>
+        <button id="menu" class="icon-btn d-lg-none">
+          <i class="bi bi-list">
+          </i>
+        </button>
+        <div class="global-search d-none d-md-flex">
+          <i class="bi bi-search">
+          </i>
+          <input id="globalSearch" placeholder="Search meetings, people...">
+        </div>
+        <div class="head-actions">
+          <button id="theme" class="icon-btn">
+            <i class="bi bi-moon-stars">
+            </i>
+          </button>
+          <button class="icon-btn position-relative" data-page="notifications">
+            <i class="bi bi-bell">
+            </i>
+            <i class="alert-dot">
+            </i>
+          </button>
+          <button class="btn btn-primary" data-page="schedule">
+            <i class="bi bi-plus-lg">
+            </i>
+            <span>Schedule</span>
+          </button>
+          <span class="avatar avatar-purple" id="headerUserAvatar">MR</span>
+        </div>
+      </header>
+      <div class="content">
+        <section id="dashboardPage" class="page active">
+          <div class="page-title">
+            <div>
+              <span class="kicker" id="dashboardDateKicker">TODAY</span>
+              <h1>Good morning, <span id="dashboardUserName">MADHANRAJ</span></h1>
+              <p>Here's what's happening with your schedule today.</p>
+            </div>
+            <button class="btn btn-primary" data-page="schedule">
+              <i class="bi bi-plus-lg">
+              </i>
+              Schedule meeting</button>
+          </div>
+          <div id="stats" class="row g-3">
+          </div>
+          <div class="row g-4 mt-1">
+            <div class="col-xl-8">
+              <div class="panel h-100">
+                <div class="panel-head">
+                  <div>
+                    <h3>Upcoming meetings</h3>
+                    <p>Your schedule for the next few days</p>
+                  </div>
+                  <button class="btn btn-soft" data-page="calendar">View calendar</button>
+                </div>
+                <div id="meetingList">
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-4">
+              <div class="panel mb-4">
+                <div class="panel-head">
+                  <div>
+                    <h3>Today's focus</h3>
+                    <p id="todaysFocusDate"></p>
+                  </div>
+                </div>
+                <div id="todaysFocus">
+                </div>
+              </div>
+              <div class="ai-insight">
+                <i class="bi bi-stars">
+                </i>
+                <div>
+                  <span>AI ASSISTANT</span>
+                  <h3>Need a free slot or a quick booking?</h3>
+                  <p>Ask MeetMind AI to check your calendar or schedule something for you.</p>
+                  <button class="btn btn-light btn-sm" data-page="smart">Ask the assistant</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row g-4 mt-1">
+            <div class="col-lg-7">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h3>Weekly activity</h3>
+                    <p>Meeting hours across your week</p>
+                  </div>
+                </div>
+                <div class="chart-sm">
+                  <canvas id="dashChart">
+                  </canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="panel h-100">
+                <div class="panel-head">
+                  <div>
+                    <h3>Pending invitations</h3>
+                    <p>Waiting for your response</p>
+                  </div>
+                  <b id="pendingPill" class="warn-pill">
+                  </b>
+                </div>
+                <div id="invites">
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="schedulePage" class="page">
+          <div class="page-title">
+            <div>
+              <span class="kicker">CREATE</span>
+              <h1>Schedule a meeting</h1>
+              <p>Set the details and let MeetMind coordinate the rest.</p>
+            </div>
+            <button class="btn btn-soft" data-page="smart">
+              <i class="bi bi-stars">
+              </i>
+              Use smart scheduler</button>
+          </div>
+          <div class="row g-4">
+            <div class="col-xl-8">
+              <div class="panel schedule-panel">
+                <form id="scheduleForm">
+                  <div class="form-block">
+                    <b>1</b>
+                    <div>
+                      <h3>Meeting details</h3>
+                      <p>Give your meeting a clear name and purpose.</p>
+                      <label class="form-label">Meeting title</label>
+                      <input id="meetingTitle" class="form-control mb-3" placeholder="e.g. Q3 Product Strategy"
+                        required>
+                      <label class="form-label">Description</label>
+                      <textarea id="meetingDescription" class="form-control" rows="4" maxlength="300"
+                        placeholder="Add an agenda or helpful context...">
+                        </textarea>
+                      <small id="charCount" class="float-end muted">0 / 300</small>
+                    </div>
+                  </div>
+                  <div class="form-block">
+                    <b>2</b>
+                    <div>
+                      <h3>Date & time</h3>
+                      <p>Choose your preferred schedule.</p>
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <label class="form-label">Date</label>
+                          <input id="meetingDate" type="date" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label">Start time</label>
+                          <input id="meetingTime" type="time" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label">Duration</label>
+                          <select id="meetingDuration" class="form-select">
+                            <option>15</option>
+                            <option selected>30</option>
+                            <option>45</option>
+                            <option>60</option>
+                            <option>90</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label">Priority</label>
+                          <select id="meetingPriority" class="form-select">
+                            <option>Low</option>
+                            <option selected>Medium</option>
+                            <option>High</option>
+                            <option>Critical</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-block">
+                    <b>3</b>
+                    <div>
+                      <h3>Participants</h3>
+                      <p>Search saved contacts or type any email address directly.</p>
+                      <div class="picker-search">
+                        <i class="bi bi-search">
+                        </i>
+                        <input id="pickerSearch" placeholder="Search by name or email...">
+                      </div>
+                      <div id="pickerList">
+                      </div>
+                      <div id="selectedPeople">
+                      </div>
+                      <div class="email-tag-row mt-3">
+                        <label class="form-label">Add by email</label>
+                        <div class="email-tag-input-wrap" id="emailTagWrap">
+                          <div id="emailTags" class="email-tags"></div>
+                          <input id="emailTagInput" type="email" placeholder="name@example.com and press Enter"
+                            autocomplete="off">
+
+                        </div>
+                      </div>
+                      <div class="form-block email-draft-block" id="emailDraftBlock" style="display:none">
+                        <b><i class="bi bi-stars"></i></b>
+                        <div style="flex:1">
+                          <h3>AI email draft</h3>
+                          <p>Personalized invite email generated from your meeting details.</p>
+                          <div class="email-draft-card" id="emailDraftCard">
+                            <div class="email-draft-loading" id="emailDraftLoading">
+                              <span class="spinner-border spinner-border-sm"></span> Generating draft...
+                            </div>
+                            <div id="emailDraftContent" style="display:none">
+                              <label class="form-label mt-2">Subject</label>
+                              <input id="emailDraftSubject" type="text" class="form-control form-control-sm mb-2">
+                              <label class="form-label">Body</label>
+                              <textarea id="emailDraftBody" class="form-control form-control-sm" rows="8"></textarea>
+                              <div class="d-flex gap-2 mt-2">
+                                <button type="button" id="regenerateDraft" class="btn btn-soft btn-sm">
+                                  <i class="bi bi-arrow-clockwise"></i> Regenerate
+                                </button>
+                                <span class="muted small mt-1">Edit freely — this is what participants will
+                                  receive.</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div id="scheduleNecessityBanner" class="schedule-necessity-banner d-none"></div>
+                      <div class="form-actions">
+                        <button type="reset" id="clearForm" class="btn btn-soft">Clear</button>
+                        <button class="btn btn-primary">
+                          <i class="bi bi-calendar-check">
+                          </i>
+                          Schedule meeting</button>
+                      </div>
+                </form>
+              </div>
+            </div>
+            <div class="col-xl-4">
+              <div class="panel sticky">
+                <i class="preview-icon bi bi-calendar-event">
+                </i>
+                <h3>Meeting preview</h3>
+                <div id="preview">
+                </div>
+              </div>
+              <div class="tip mt-4">
+                <i class="bi bi-lightbulb">
+                </i>
+                <p>
+                  <b>Scheduling tip</b>
+                  <br>
+                  10 AM-2 PM meetings have 23% higher attendance for your team.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="smartPage" class="page">
+          <div class="page-title">
+            <div>
+              <span class="kicker">MEETMIND AI</span>
+              <h1>Smart scheduler</h1>
+              <p>Schedule smarter — chat with AI or optimize your week.</p>
+            </div>
+          </div>
+          <div class="smart-tabs">
+            <button class="smart-tab active" data-tab="chat">
+              <i class="bi bi-chat-dots"></i> AI Assistant
+            </button>
+            <button class="smart-tab" data-tab="optimizer">
+              <i class="bi bi-lightning-charge"></i> Meeting Optimizer
+            </button>
+          </div>
+          <div id="smartTabChat" class="smart-tab-content">
+            <div class="panel smart-chat-panel">
+              <div class="panel-head">
+                <div>
+                  <h3><i class="bi bi-stars"></i> AI scheduling assistant</h3>
+                  <p>Powered by your real Google Calendar availability.</p>
+                </div>
+              </div>
+              <div id="smartChatMessages" class="chat-messages chat-messages-lg"></div>
+              <form id="smartChatForm" class="chat-input-row">
+                <input id="smartChatInput" type="text" class="form-control"
+                  placeholder="e.g. Am I free tomorrow at 3pm? or Book a sync with sam@co.com Friday 10am"
+                  autocomplete="off">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-send"></i>
+                </button>
+              </form>
+              <div class="chat-suggestions">
+                <button type="button" class="chip" data-suggest="Show me my free slots tomorrow">Free slots
+                  tomorrow</button>
+                <button type="button" class="chip" data-suggest="Am I free this Friday at 2pm?">Check Friday
+                  2pm</button>
+                <button type="button" class="chip" data-suggest="Schedule a 30 minute sync tomorrow at 11am">Book a
+                  meeting</button>
+              </div>
+            </div>
+          </div>
+          <div id="smartTabOptimizer" class="smart-tab-content d-none">
+            <div class="panel optimizer-panel">
+              <div class="panel-head">
+                <div>
+                  <h3><i class="bi bi-lightning-charge"></i> Meeting optimizer</h3>
+                  <p>Analyzes your next 14 days and suggests how to rebalance your schedule.</p>
+                </div>
+                <button id="runOptimizerBtn" class="btn btn-primary">
+                  <i class="bi bi-stars"></i> Analyze my calendar
+                </button>
+              </div>
+              <div id="optimizerResult" class="optimizer-result">
+                <div class="optimizer-empty">
+                  <i class="bi bi-calendar2-week"></i>
+                  <p>Click <b>Analyze my calendar</b> to get AI-powered suggestions for a more productive week.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="calendarPage" class="page">
+          <div class="page-title">
+            <div>
+              <span class="kicker">PLANNER</span>
+              <h1>Calendar</h1>
+              <p>See your time clearly and stay ahead of every meeting.</p>
+            </div>
+            <button class="btn btn-primary" data-page="schedule">
+              <i class="bi bi-plus-lg">
+              </i>
+              New meeting</button>
+          </div>
+          <div class="panel">
+            <div class="calendar-tools">
+              <div>
+                <button id="calPrev" class="icon-btn">
+                  <i class="bi bi-chevron-left">
+                  </i>
+                </button>
+                <button id="calToday" class="btn btn-soft">Today</button>
+                <button id="calNext" class="icon-btn">
+                  <i class="bi bi-chevron-right">
+                  </i>
+                </button>
+                <h2 id="calTitle">
+                </h2>
+              </div>
+              <div class="btn-group" id="viewBtns">
+                <button data-view="day" class="btn btn-outline-secondary">Day</button>
+                <button data-view="week" class="btn btn-outline-secondary">Week</button>
+                <button data-view="month" class="btn btn-outline-secondary active">Month</button>
+              </div>
+            </div>
+            <div id="calendar">
+            </div>
+          </div>
+        </section>
+        <section id="participantsPage" class="page">
+          <div class="page-title">
+            <div>
+              <span class="kicker">TEAM</span>
+              <h1>Participants</h1>
+              <p>Manage your scheduling network and see who's available.</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#personModal">
+              <i class="bi bi-person-plus">
+              </i>
+              Add participant</button>
+          </div>
+          <div class="panel filters">
+            <div>
+              <i class="bi bi-search">
+              </i>
+              <input id="peopleSearch" placeholder="Search participants...">
+            </div>
+            <select id="statusFilter" class="form-select">
+              <option value="all">All statuses</option>
+              <option>Available</option>
+              <option>Busy</option>
+              <option>Pending Response</option>
+            </select>
+            <span>
+              <b id="peopleCount">15</b>
+              participants</span>
+          </div>
+          <div id="peopleCards" class="row g-4 mt-0">
+          </div>
+        </section>
+        <section id="notificationsPage" class="page">
+          <div class="page-title">
+            <div>
+              <span class="kicker">INBOX</span>
+              <h1>Notifications</h1>
+              <p>Updates, reminders, and scheduling activity in one place.</p>
+            </div>
+            <button id="markRead" class="btn btn-soft">
+              <i class="bi bi-check2-all">
+              </i>
+              Mark all as read</button>
+          </div>
+          <div id="notifTabs" class="tabs">
+            <button class="active" data-filter="all">All</button>
+            <button data-filter="reminder">Reminders</button>
+            <button data-filter="invitation">Invitations</button>
+            <button data-filter="cancellation">Cancellations</button>
+          </div>
+          <div id="notificationList">
+          </div>
+        </section>
+        <section id="analyticsPage" class="page">
+          <div class="page-title">
+            <div>
+              <span class="kicker">INSIGHTS</span>
+              <h1>Analytics</h1>
+              <p>Understand how your team meets, collaborates, and uses time.</p>
+            </div>
+            <select class="form-select range">
+              <option>Last 6 months</option>
+              <option>Last 12 months</option>
+            </select>
+          </div>
+          <div id="analyticsStats" class="row g-3">
+          </div>
+          <div class="row g-4 mt-1">
+            <div class="col-xl-8">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h3>Meetings per month</h3>
+                    <p>Volume and completed meetings over time</p>
+                  </div>
+                  <b class="good">Up 8.4%</b>
+                </div>
+                <div class="chart">
+                  <canvas id="meetingsChart">
+                  </canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-4">
+              <div class="panel h-100">
+                <div class="panel-head">
+                  <div>
+                    <h3>Attendance rate</h3>
+                    <p>Last 6 months</p>
+                  </div>
+                </div>
+                <div class="donut">
+                  <canvas id="attendanceChart">
+                  </canvas>
+                  <span>
+                    <b>87%</b>
+                    <small>Average</small>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row g-4 mt-1">
+            <div class="col-lg-6">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h3>Conflict statistics</h3>
+                    <p>Scheduling friction by cause</p>
+                  </div>
+                </div>
+                <div class="chart-sm">
+                  <canvas id="conflictChart">
+                  </canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h3>Team availability</h3>
+                    <p>Average open time by weekday</p>
+                  </div>
+                </div>
+                <div class="chart-sm">
+                  <canvas id="teamChart">
+                  </canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Smart Timetable Scheduler -->
+        <section id="timetablePage" class="page">
+          <div class="page-title">
+            <div>
+              <span class="kicker">SMART TIMETABLE SCHEDULER</span>
+              <h1>Timetable scheduler</h1>
+              <p>Upload timetables, find common free slots, and schedule meetings with AI.</p>
+            </div>
+          </div>
+          <div class="row g-4">
+            <!-- LEFT PANEL -->
+            <div class="col-xl-3">
+              <div class="panel mb-4">
+                <div class="panel-head">
+                  <div>
+                    <h3>Organization</h3>
+                  </div>
+                </div>
+                <label class="form-label">Category</label>
+                <select id="ttOrgType" class="form-select form-select-sm mb-2">
+                  <option value="company">Company</option>
+                  <option value="school">School</option>
+                  <option value="college">College</option>
+                  <option value="university">University</option>
+                </select>
+                <label class="form-label">Organization name <span class="text-danger">*</span></label>
+                <div class="tt-org-name-wrap mb-1">
+                  <input id="ttOrgName" type="text" class="form-control form-control-sm"
+                    placeholder="e.g. Acme Corp, CSE Dept A">
+                  <datalist id="ttOrgNameList"></datalist>
+                </div>
+                <p class="muted" style="font-size:.62rem;margin-bottom:12px">Each unique name is kept completely
+                  separate. Use the same name to add more entries to an existing organization.</p>
+                <hr>
+                <label class="form-label">Meeting duration</label>
+                <select id="ttDuration" class="form-select form-select-sm mb-3">
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60" selected>1 hour</option>
+                  <option value="90">1.5 hours</option>
+                  <option value="120">2 hours</option>
+                </select>
+                <label class="form-label">Work hours</label>
+                <div class="d-flex gap-2 mb-3">
+                  <input id="ttWorkStart" type="time" class="form-control form-control-sm" value="09:00">
+                  <span class="mt-1">–</span>
+                  <input id="ttWorkEnd" type="time" class="form-control form-select-sm" value="18:00">
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="ttSkipLunch" checked>
+                  <label class="form-check-label small" for="ttSkipLunch">Skip lunch/breaks from timetable</label>
+                </div>
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="ttSkipWeekends" checked>
+                  <label class="form-check-label small" for="ttSkipWeekends">Skip weekends</label>
+                </div>
+                <hr>
+                <h3 class="mb-2" style="font-size:.82rem">Upload timetable</h3>
+                <p class="muted small mb-2">CSV or Excel (.xlsx)</p>
+                <input type="file" id="ttFileInput" accept=".csv,.xlsx,.xls" class="d-none">
+                <button class="btn btn-soft btn-sm w-100 mb-2" onclick="$('#ttFileInput').click()">
+                  <i class="bi bi-upload"></i> Choose file
+                </button>
+                <div id="ttUploadStatus" class="small muted"></div>
+              </div>
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h3>Filters</h3>
+                  </div>
+                </div>
+                <input id="ttSearchFilter" type="text" class="form-control form-control-sm mb-2"
+                  placeholder="Search participant…">
+                <select id="ttDayFilter" class="form-select form-select-sm mb-2">
+                  <option value="">All days</option>
+                  <option>Monday</option>
+                  <option>Tuesday</option>
+                  <option>Wednesday</option>
+                  <option>Thursday</option>
+                  <option>Friday</option>
+                  <option>Saturday</option>
+                  <option>Sunday</option>
+                </select>
+                <input id="ttDeptFilter" type="text" class="form-control form-control-sm mb-2"
+                  placeholder="Department…">
+                <button class="btn btn-primary btn-sm w-100" id="ttApplyFilter"><i class="bi bi-funnel"></i> Apply
+                  filters</button>
+              </div>
+            </div>
+            <!-- CENTER -->
+            <div class="col-xl-6">
+              <!-- Add entry form -->
+              <div class="panel mb-4">
+                <div class="panel-head">
+                  <div>
+                    <h3>Add entry manually</h3>
+                  </div>
+                  <button class="btn btn-soft btn-sm" id="ttToggleForm"><i class="bi bi-plus-lg"></i> Add</button>
+                </div>
+                <div id="ttManualForm" class="d-none">
+                  <div class="row g-2 mb-2">
+                    <div class="col-6"><input id="ttPName" class="form-control form-control-sm"
+                        placeholder="Participant name *"></div>
+                    <div class="col-6"><input id="ttPEmail" type="email" class="form-control form-control-sm"
+                        placeholder="Email (optional)"></div>
+                  </div>
+                  <div class="row g-2 mb-2">
+                    <div class="col-6"><input id="ttDept" class="form-control form-control-sm" placeholder="Department">
+                    </div>
+                    <div class="col-6"><input id="ttClass" class="form-control form-control-sm"
+                        placeholder="Class / Team"></div>
+                  </div>
+                  <div class="row g-2 mb-2">
+                    <div class="col-4">
+                      <select id="ttDay" class="form-select form-select-sm">
+                        <option value="">Day *</option>
+                        <option>Monday</option>
+                        <option>Tuesday</option>
+                        <option>Wednesday</option>
+                        <option>Thursday</option>
+                        <option>Friday</option>
+                        <option>Saturday</option>
+                        <option>Sunday</option>
+                      </select>
+                    </div>
+                    <div class="col-4"><input id="ttStart" type="time" class="form-control form-control-sm"></div>
+                    <div class="col-4"><input id="ttEnd" type="time" class="form-control form-control-sm"></div>
+                  </div>
+                  <div class="row g-2 mb-3">
+                    <div class="col-8"><input id="ttSubject" class="form-control form-control-sm"
+                        id="ttSubjectInput"><label id="ttSubjectLabel" class="form-label"
+                        style="font-size:.68rem;margin-top:3px">Subject / Task *</label></div>
+                    <div class="col-4"><input id="ttRoom" class="form-control form-control-sm"><label id="ttRoomLabel"
+                        class="form-label" style="font-size:.68rem;margin-top:3px">Room</label></div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" id="ttSaveEntry"><i class="bi bi-check-lg"></i> Save
+                      entry</button>
+                    <button class="btn btn-soft btn-sm" id="ttCancelForm">Cancel</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Timetable table -->
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h3>Timetable entries</h3>
+                    <p id="ttEntryCount" class="muted small">Loading…</p>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-danger btn-sm" id="ttDeleteSheetBtn" title="Delete entire sheet / organization">
+                      <i class="bi bi-trash3"></i> Delete sheet
+                    </button>
+                    <button class="btn btn-soft btn-sm" id="ttRefreshBtn" title="Refresh"><i class="bi bi-arrow-clockwise"></i></button>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table tt-table">
+                    <thead>
+                      <tr>
+                        <th>Participant</th>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th id="ttSubjectColHeader">Subject</th>
+                        <th>Dept</th>
+                        <th id="ttRoomColHeader">Room</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="ttTableBody">
+                      <tr>
+                        <td colspan="7" class="text-center muted small py-4">No entries yet. Upload a file or add
+                          manually.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- RIGHT PANEL -->
+            <div class="col-xl-3">
+              <div class="panel mb-4">
+                <div class="panel-head">
+                  <div>
+                    <h3>Participants</h3>
+                    <p class="muted small">Select who to schedule for</p>
+                  </div>
+                </div>
+                <input id="ttParticipantSearch" type="text" class="form-control form-control-sm mb-2"
+                  placeholder="Search by name or email…">
+                <div id="ttParticipantList" class="tt-participant-list"></div>
+                <div id="ttSelectedParticipants" class="tt-selected-chips mt-2"></div>
+                <button class="btn btn-primary btn-sm w-100 mt-3" id="ttFindSlot">
+                  <i class="bi bi-stars"></i> Find best slot
+                </button>
+              </div>
+              <!-- AI Recommendations -->
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h3>AI recommendations</h3>
+                  </div>
+                </div>
+                <div id="ttRecommendations">
+                  <div class="tt-empty-recs">
+                    <i class="bi bi-stars"></i>
+                    <p>Select participants and click <b>Find best slot</b> to get AI recommendations.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="modal fade" id="editMeetingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="editMeetingForm">
+          <div class="modal-header">
+            <div>
+              <span class="kicker">MEETING</span>
+              <h3>Edit meeting</h3>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input id="editMeetingId" type="hidden">
+            <label class="form-label" for="editMeetingTitle">Meeting title</label>
+            <input id="editMeetingTitle" class="form-control mb-3" required>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <label class="form-label" for="editMeetingDate">Date</label>
+                <input id="editMeetingDate" type="date" class="form-control" required>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="editMeetingTime">Time</label>
+                <input id="editMeetingTime" type="time" class="form-control" required>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="editMeetingDuration">Duration</label>
+                <select id="editMeetingDuration" class="form-select">
+                  <option value="15">15 minutes</option>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">60 minutes</option>
+                  <option value="90">90 minutes</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="editMeetingPriority">Priority</label>
+                <select id="editMeetingPriority" class="form-select">
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                  <option>Critical</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-soft" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Timetable upload preview modal -->
+  <div class="modal fade" id="ttPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <span class="kicker">UPLOAD PREVIEW</span>
+            <h3 id="ttPreviewTitle">Review before saving</h3>
+          </div>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="ttPreviewSummary" class="tt-preview-summary mb-3"></div>
+          <div class="table-responsive" style="max-height:320px;overflow-y:auto">
+            <table class="table tt-table">
+              <thead>
+                <tr>
+                  <th>Participant</th>
+                  <th>Dept</th>
+                  <th>Class/Team</th>
+                  <th>Day</th>
+                  <th>Time</th>
+                  <th>Subject / Task</th>
+                  <th>Room</th>
+                </tr>
+              </thead>
+              <tbody id="ttPreviewBody"></tbody>
+            </table>
+          </div>
+          <div id="ttPreviewErrors" class="mt-2"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-soft" data-bs-dismiss="modal" id="ttPreviewDiscard">
+            <i class="bi bi-x-lg"></i> Discard
+          </button>
+          <button class="btn btn-primary" id="ttPreviewSave">
+            <i class="bi bi-database-check"></i> Save to database
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="personModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="personForm">
+          <div class="modal-header">
+            <h3>Add participant</h3>
+            <button class="btn-close" data-bs-dismiss="modal">
+            </button>
+          </div>
+          <div class="modal-body">
+            <label class="form-label">Full name</label>
+            <input id="newName" class="form-control mb-3" required>
+            <label class="form-label">Email</label>
+            <input id="newEmail" type="email" class="form-control mb-3" required>
+            <label class="form-label">Role</label>
+            <input id="newRole" class="form-control" required>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-soft" type="button" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn btn-primary">Add participant</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast">
+      <div class="toast-body d-flex gap-3 align-items-center">
+        <i class="toast-check bi bi-check-lg">
+        </i>
+        <div>
+          <b id="toastTitle">
+          </b>
+          <small id="toastText">
+          </small>
+        </div>
+        <button class="btn-close ms-auto" data-bs-dismiss="toast">
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="chatLauncher" class="chat-launcher d-none" aria-label="Open AI scheduling assistant" role="button">
+    <i class="bi bi-stars"></i>
+  </div>
+  <div id="chatWidget" class="chat-widget d-none">
+    <div class="chat-widget-head">
+      <div>
+        <strong><i class="bi bi-stars"></i> MeetMind AI</strong>
+        <small>Free slots - conflicts - bookings</small>
+      </div>
+      <button id="chatWidgetClose" type="button" class="btn-close" aria-label="Close chat"></button>
+    </div>
+    <div id="chatWidgetMessages" class="chat-messages"></div>
+    <form id="chatWidgetForm" class="chat-input-row">
+      <input id="chatWidgetInput" type="text" class="form-control" placeholder="Ask about your schedule..."
+        autocomplete="off">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-send"></i>
+      </button>
+    </form>
+  </div>
+  <!-- Delete confirmation modal -->
+  <div class="modal fade" id="deleteMeetingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <div class="delete-modal-icon">
+            <i class="bi bi-trash3"></i>
+          </div>
+        </div>
+        <div class="modal-body text-center pt-2">
+          <h5 class="fw-800 mb-1">Delete meeting?</h5>
+          <p id="deleteMeetingName" class="muted small mb-0"></p>
+          <p class="muted small mt-1">This will also remove the event from Google Calendar and cannot be undone.</p>
+        </div>
+        <div class="modal-footer border-0 justify-content-center gap-2 pt-0">
+          <button type="button" class="btn btn-soft px-4" data-bs-dismiss="modal">Keep it</button>
+          <button type="button" id="confirmDeleteBtn" class="btn btn-danger px-4">
+            <i class="bi bi-trash3"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js">
+  </script>
+  <script src="config.js">
+  </script>
+  <script src="script.js">
+  </script>
+</body>
+
+</html>
