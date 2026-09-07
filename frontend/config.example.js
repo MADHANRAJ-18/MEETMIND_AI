@@ -1,9 +1,9 @@
 // MeetMind Frontend Configuration Template
-// Copy this file to `config.js` and insert your actual Supabase URL and Anon Key.
-// `config.js` is ignored by git so your credentials stay safe.
+// Optional: Copy this file to `config.js` if you need custom local overrides.
+// By default, Supabase configuration is fetched automatically from the backend (/api/auth/config).
 
 window.CONFIG = {
-  SUPABASE_URL: 'https://YOUR_SUPABASE_PROJECT.supabase.co',
-  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',
+  SUPABASE_URL: '',
+  SUPABASE_ANON_KEY: '',
   API_BASE: 'http://localhost:5000'
 };

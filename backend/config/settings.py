@@ -35,7 +35,7 @@ class Settings:
     LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "groq").lower()  # groq | ollama | openrouter
 
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
-    GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+    GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 
     OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
     OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.1")

@@ -34,7 +34,9 @@ env/
 *.env
 !.env.example
 config.js
+frontend/config.js
 !config.example.js
+!frontend/config.example.js
 
 # IDEs
 .vscode/

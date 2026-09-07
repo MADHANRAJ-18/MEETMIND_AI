@@ -1,5 +1,34 @@
 const $=(s, r=document)=>r.querySelector(s), $$=(s, r=document)=>[...r.querySelectorAll(s)];
 
+// Immediately capture provider tokens and OAuth redirect errors from URL before Supabase clears the hash
+let _capturedProviderToken = '';
+let _capturedProviderRefreshToken = '';
+let _oauthError = '';
+
+try {
+  const hash = window.location.hash ? window.location.hash.substring(1) : '';
+  if (hash) {
+    const params = new URLSearchParams(hash);
+    if (params.get('error') || params.get('error_description')) {
+      _oauthError = params.get('error_description') || params.get('error');
+    }
+    const pt = params.get('provider_token');
+    const prt = params.get('provider_refresh_token');
+    if (pt) {
+      _capturedProviderToken = pt;
+      sessionStorage.setItem('mm_google_provider_token', pt);
+    }
+    if (prt) {
+      _capturedProviderRefreshToken = prt;
+      localStorage.setItem('mm_google_provider_refresh_token', prt);
+    }
+  }
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.get('error') || searchParams.get('error_description')) {
+    _oauthError = searchParams.get('error_description') || searchParams.get('error');
+  }
+} catch (_) {}
+
 // --- MeetMind backend integration -----------------------------------------
 const API_BASE = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.API_BASE) || 'http://localhost:5000';
 const TOKEN_KEY = 'mm_jwt';
@@ -8,12 +37,39 @@ let useBackend = false;
 let _supabaseSession = null;
 
 // --- Supabase Auth client --------------------------------------------------
-// Credentials loaded from config.js (gitignored). See config.example.js
-const SUPABASE_URL  = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.SUPABASE_URL) || '';
-const SUPABASE_ANON = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.SUPABASE_ANON_KEY) || '';
-const _supabase     = (typeof supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes('YOUR_SUPABASE_PROJECT'))
+// Supabase credentials are loaded dynamically from the backend (/api/auth/config)
+// or can be overridden via window.CONFIG (see config.example.js).
+let SUPABASE_URL  = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.SUPABASE_URL) || '';
+let SUPABASE_ANON = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.SUPABASE_ANON_KEY) || '';
+let _supabase     = (typeof supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes('YOUR_SUPABASE_PROJECT') && SUPABASE_ANON && SUPABASE_ANON !== 'YOUR_SUPABASE_ANON_KEY')
   ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
   : null;
+
+async function initSupabase() {
+  if (_supabase) return _supabase;
+
+  if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_SUPABASE_PROJECT') || !SUPABASE_ANON || SUPABASE_ANON === 'YOUR_SUPABASE_ANON_KEY') {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/config`);
+      if (res.ok) {
+        const cfg = await res.json();
+        if (cfg.supabase_url) SUPABASE_URL = cfg.supabase_url;
+        if (cfg.supabase_anon_key) SUPABASE_ANON = cfg.supabase_anon_key;
+      }
+    } catch (e) {
+      console.warn('Could not load Supabase auth config from backend:', e.message);
+    }
+  }
+
+  if (typeof supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes('YOUR_SUPABASE_PROJECT') && SUPABASE_ANON && SUPABASE_ANON !== 'YOUR_SUPABASE_ANON_KEY') {
+    try {
+      _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    } catch (err) {
+      console.error('Failed to initialize Supabase client:', err);
+    }
+  }
+  return _supabase;
+}
 
 function getToken() {
   // Use Supabase session token if available, fallback to localStorage
@@ -201,14 +257,19 @@ async function syncUserWithBackend(session) {
    * backend upserts the user row and stores the Google Calendar tokens.
    * Returns the user profile from our backend.
    */
+  const googleAccessToken = session.provider_token || _capturedProviderToken || sessionStorage.getItem('mm_google_provider_token') || '';
+  const googleRefreshToken = session.provider_refresh_token || _capturedProviderRefreshToken || localStorage.getItem('mm_google_provider_refresh_token') || '';
+  const provider = session.user?.app_metadata?.provider || (googleAccessToken ? 'google' : 'email');
+
   const body = {
     access_token:          session.access_token,
-    google_access_token:   session.provider_token    || '',
-    google_refresh_token:  session.provider_refresh_token || '',
+    google_access_token:   googleAccessToken,
+    google_refresh_token:  googleRefreshToken,
     name:  session.user?.user_metadata?.full_name || session.user?.email || '',
     email: session.user?.email || '',
     avatar_url: session.user?.user_metadata?.avatar_url || '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    auth_provider: provider,
   };
   const data = await apiFetch('/api/auth/sync', {
     method: 'POST',
@@ -218,6 +279,7 @@ async function syncUserWithBackend(session) {
 }
 
 async function tryBackendSession() {
+  if (!_supabase) return false;
   // Check if Supabase already has an active session (e.g. after page refresh)
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) return false;
@@ -260,41 +322,52 @@ async function init() {
   renderAll();
   startMeetingReminderWatcher();
 
+  if (_oauthError) {
+    handleAuthError(new Error(decodeURIComponent(_oauthError.replace(/\+/g, ' '))));
+    try {
+      history.replaceState(null, '', window.location.pathname);
+    } catch (_) {}
+  }
+
+  await initSupabase();
+
   // Listen for Supabase auth state changes (handles redirect callback automatically)
-  _supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      _supabaseSession = session;
-      $('#loader').classList.remove('hide');
-      try {
-        const user = await syncUserWithBackend(session);
-        currentUser = user;
-        useBackend = true;
-      } catch (_) {
-        currentUser = {
-          id:    session.user.id,
-          email: session.user.email,
-          name:  session.user.user_metadata?.full_name || session.user.email,
-        };
-        useBackend = true;
+  if (_supabase) {
+    _supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        _supabaseSession = session;
+        $('#loader').classList.remove('hide');
+        try {
+          const user = await syncUserWithBackend(session);
+          currentUser = user;
+          useBackend = true;
+        } catch (_) {
+          currentUser = {
+            id:    session.user.id,
+            email: session.user.email,
+            name:  session.user.user_metadata?.full_name || session.user.email,
+          };
+          useBackend = true;
+        }
+        await loadMeetingsFromBackend();
+        $('#loader').classList.add('hide');
+        auth(true);
+        startParticipantPoller();
+      } else if (event === 'SIGNED_OUT') {
+        _supabaseSession = null;
+        currentUser = null;
+        useBackend = false;
+        meetings = [];
+        notifications = [];
+        stopParticipantPoller();
+        renderAll();
+        auth(false);
+        $('#loader').classList.add('hide');
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        _supabaseSession = session;
       }
-      await loadMeetingsFromBackend();
-      $('#loader').classList.add('hide');
-      auth(true);
-      startParticipantPoller();
-    } else if (event === 'SIGNED_OUT') {
-      _supabaseSession = null;
-      currentUser = null;
-      useBackend = false;
-      meetings = [];
-      notifications = [];
-      stopParticipantPoller();
-      renderAll();
-      auth(false);
-      $('#loader').classList.add('hide');
-    } else if (event === 'TOKEN_REFRESHED' && session) {
-      _supabaseSession = session;
-    }
-  });
+    });
+  }
 
   const [signedIn] = await Promise.all([
     tryBackendSession(),
@@ -384,6 +457,13 @@ function bind() {
       const email = $('#suEmail').value.trim();
       const password = $('#suPassword').value;
 
+      if (!_supabase) {
+        handleAuthError(new Error("Authentication service is not configured. Please check backend connection."));
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        return;
+      }
+
       const { data, error } = await _supabase.auth.signUp({
         email,
         password,
@@ -429,6 +509,13 @@ function bind() {
       const email = $('#siEmail').value.trim();
       const password = $('#siPassword').value;
 
+      if (!_supabase) {
+        handleAuthError(new Error("Authentication service is not configured. Please check backend connection."));
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        return;
+      }
+
       const { data, error } = await _supabase.auth.signInWithPassword({
         email,
         password,
@@ -451,6 +538,14 @@ function bind() {
     const originalHtml = btn.innerHTML;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Redirecting…';
     btn.disabled = true;
+
+    if (!_supabase) {
+      handleAuthError(new Error("Authentication service is not configured. Please check backend connection."));
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+      return;
+    }
+
     const { error } = await _supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -476,8 +571,16 @@ function bind() {
 
   // Logout
   $('#logout').onclick = async () => {
-    await _supabase.auth.signOut();
+    if (_supabase) {
+      try {
+        await _supabase.auth.signOut();
+      } catch (_) {}
+    }
     clearToken();
+    try {
+      sessionStorage.removeItem('mm_google_provider_token');
+      localStorage.removeItem('mm_google_provider_refresh_token');
+    } catch (_) {}
     currentUser = null;
     useBackend = false;
     _supabaseSession = null;

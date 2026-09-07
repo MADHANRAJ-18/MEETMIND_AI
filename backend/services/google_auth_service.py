@@ -63,23 +63,30 @@ def get_valid_access_token(user: dict) -> str:
     access_token = user.get("google_access_token")
     needs_refresh = True
 
-    if expiry_str and access_token:
-        try:
-            expiry_dt = datetime.fromisoformat(expiry_str.replace("Z", "+00:00"))
-            # Treat the token as valid if it expires more than 60 s from now
-            if expiry_dt > datetime.now(timezone.utc) + timedelta(seconds=60):
-                needs_refresh = False
-        except ValueError:
-            needs_refresh = True
+    if access_token:
+        if expiry_str:
+            try:
+                expiry_dt = datetime.fromisoformat(expiry_str.replace("Z", "+00:00"))
+                # Treat the token as valid if it expires more than 60 s from now
+                if expiry_dt > datetime.now(timezone.utc) + timedelta(seconds=60):
+                    needs_refresh = False
+            except ValueError:
+                needs_refresh = True
+        else:
+            # Token exists but has no expiry recorded yet — treat as valid
+            needs_refresh = False
 
-    if not needs_refresh:
+    if not needs_refresh and access_token:
         return access_token
 
     refresh_token = user.get("google_refresh_token")
     if not refresh_token:
+        if access_token:
+            # Fall back to existing access token if no refresh token is stored
+            return access_token
         raise GoogleAuthError(
-            "Google access token has expired and no refresh token is stored. "
-            "Please sign out and sign in again to re-grant Calendar access."
+            "Google Calendar is not connected to your account. "
+            "Please sign in with Google to grant Calendar access."
         )
 
     tokens = _refresh_access_token(refresh_token)

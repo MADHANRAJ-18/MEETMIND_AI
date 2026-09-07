@@ -1,4 +1,4 @@
-﻿
+
 
 import os
 from flask import Flask, jsonify
@@ -16,9 +16,14 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.url_map.strict_slashes = False
 
+    allowed_origins = [settings.FRONTEND_URL] if settings.FRONTEND_URL else []
+    for origin in ("http://localhost:3000", "http://localhost:5000", "http://localhost:5500", "http://127.0.0.1:5500", "http://127.0.0.1:5000"):
+        if origin not in allowed_origins:
+            allowed_origins.append(origin)
+
     CORS(
         app,
-        resources={r"/api/*": {"origins": settings.FRONTEND_URL}},
+        resources={r"/api/*": {"origins": allowed_origins if settings.FLASK_ENV == "development" else (settings.FRONTEND_URL or "*")}},
         supports_credentials=True,
     )
 

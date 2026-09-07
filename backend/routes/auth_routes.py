@@ -6,9 +6,23 @@ Token verification uses supabase.auth.get_user() — works for all JWT algorithm
 from flask import Blueprint, request, jsonify, g
 
 from config.supabase_client import get_supabase
+from config.settings import settings
 from middleware.auth_middleware import token_required
 
 auth_bp = Blueprint("auth_bp", __name__, url_prefix="/api/auth")
+
+
+@auth_bp.route("/config", methods=["GET"])
+def auth_config():
+    """
+    Public endpoint to provide Supabase client configuration (URL and anon key)
+    to the frontend so client credentials don't need to be hardcoded in frontend files.
+    """
+    return jsonify({
+        "supabase_url": settings.SUPABASE_URL,
+        "supabase_anon_key": settings.SUPABASE_ANON_KEY,
+    })
+
 
 
 def _safe_user(user: dict) -> dict:
@@ -70,18 +84,31 @@ def sync():
 
     google_access_token  = (body.get("google_access_token")  or "").strip()
     google_refresh_token = (body.get("google_refresh_token") or "").strip()
+    auth_provider = body.get("auth_provider") or "google"
+    record["auth_provider"] = auth_provider
+
     if google_access_token:
         record["google_access_token"] = google_access_token
+        # Google access tokens are valid for 1 hour (3600s); store expiry
+        record["google_token_expiry"] = (
+            datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=3300)
+        ).isoformat()
     if google_refresh_token:
         record["google_refresh_token"] = google_refresh_token
 
     try:
-        existing = supabase.table("users").select("id").eq("id", supabase_user_id).execute()
+        existing = supabase.table("users").select("id, google_refresh_token, google_access_token").eq("id", supabase_user_id).execute()
         if existing.data:
+            existing_user = existing.data[0]
+            # Preserve existing refresh token if client didn't supply a new one in this sync
+            if not google_refresh_token and existing_user.get("google_refresh_token"):
+                record["google_refresh_token"] = existing_user["google_refresh_token"]
+            if not google_access_token and existing_user.get("google_access_token"):
+                record["google_access_token"] = existing_user["google_access_token"]
+
             result = supabase.table("users").update(record).eq("id", supabase_user_id).execute()
         else:
             record["created_at"] = now
-            record["auth_provider"] = body.get("auth_provider") or "google"
             result = supabase.table("users").insert(record).execute()
 
         user = result.data[0]

@@ -1,4 +1,4 @@
-﻿"""
+"""
 AI assistant routes:
   POST /api/ai/parse-request     -> extract structured meeting fields from text
   POST /api/ai/check-slots        -> check a specific slot against the calendar
@@ -212,7 +212,15 @@ def chat():
     try:
         access_token = google_auth_service.get_valid_access_token(user)
     except google_auth_service.GoogleAuthError as exc:
-        return jsonify({"error": str(exc)}), 401
+        reply = (
+            "To check calendar availability or schedule meetings, please sign in with your Google account "
+            "so MeetMind has permission to access your Google Calendar."
+        )
+        return jsonify({
+            "intent": intent,
+            "reply": reply,
+            "data": {"requires_google_auth": True, "error": str(exc)}
+        })
 
     duration = int(intent_result.get("duration_minutes") or 30)
     date_str = intent_result.get("date") or reference_date
